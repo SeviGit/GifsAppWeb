@@ -11,13 +11,17 @@ export class GifsService {
   private _tagHistory: string[] = [];
   private apiURL: string = 'http://api.giphy.com/v1/gifs';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+    this.loadLocalStorage();
+    if ( this._tagHistory.length === 0 ) return;
+    this.searchTag(this._tagHistory[0]);
+  }
 
   get tagsHistory() {
     return [...this._tagHistory]
   }
 
-  //
+
   private organizeHistory(tag: string) {
     tag = tag.toLowerCase();
 
@@ -26,10 +30,22 @@ export class GifsService {
     }
     this._tagHistory.unshift(tag);
     this._tagHistory = this._tagHistory.splice(0, 10)
+    this.saveLocalStorage()
+  }
 
+  // Grabar en localStorage
+  private saveLocalStorage(): void {
+    localStorage.setItem('history', JSON.stringify(this._tagHistory));
+  }
+
+  //Cargar localStorage
+  private loadLocalStorage(): void {
+    if (!localStorage.getItem('history')) return;
+    this._tagHistory = JSON.parse(localStorage.getItem('history')!)
   }
 
 
+  //Petición Http a Api con url y paso de parámetros
   searchTag(tag: string): void {
     if (tag.length === 0) return;
     this.organizeHistory(tag);
@@ -40,9 +56,9 @@ export class GifsService {
       .set('q', tag)
 
 
-    this.http.get<SearchResponse>( `${ this.apiURL }/search`, {  params: params} )
+    this.http.get<SearchResponse>(`${this.apiURL}/search`, { params: params })
       .subscribe(resp => {
-       this.gifList = resp.data;
+        this.gifList = resp.data;
       });
     // fetch(`http://api.giphy.com/v1/gifs/search?api_key=j0OX6j3wUrsyS46g88Rku2MjTyGQNZca&q=${tag}&limit=10`)
     // .then( resp => resp.json() )
