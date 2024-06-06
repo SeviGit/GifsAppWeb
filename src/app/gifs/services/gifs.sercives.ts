@@ -13,7 +13,7 @@ export class GifsService {
 
   constructor(private http: HttpClient) {
     this.loadLocalStorage();
-    if ( this._tagHistory.length === 0 ) return;
+    if (this._tagHistory.length === 0) return;
     this.searchTag(this._tagHistory[0]);
   }
 
@@ -21,10 +21,9 @@ export class GifsService {
     return [...this._tagHistory]
   }
 
-
+  //Ordena el historial
   private organizeHistory(tag: string) {
     tag = tag.toLowerCase();
-
     if (this._tagHistory.includes(tag)) {
       this._tagHistory = this._tagHistory.filter((oldTag) => oldTag !== tag);
     }
@@ -54,7 +53,6 @@ export class GifsService {
       .set('api_key', GIPHY_API_KEY)
       .set('limit', '10')
       .set('q', tag)
-
 
     this.http.get<SearchResponse>(`${this.apiURL}/search`, { params: params })
       .subscribe(resp => {
